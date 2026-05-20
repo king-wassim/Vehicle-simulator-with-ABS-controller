@@ -1,0 +1,8 @@
+# Force LF on all text — code lives in WSL/Linux
+* text=auto eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.gif binary
+*.pdf binary
