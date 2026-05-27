@@ -39,6 +39,10 @@ Détails : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 | [`docs/PHYSICS.md`](docs/PHYSICS.md) | Équations véhicule, slip ratio, Pacejka | ✅ |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Choix de design, structure logicielle | ✅ |
 | [`docs/PROTOCOL.md`](docs/PROTOCOL.md) | Spec trame binaire, framing, CRC | ✅ |
+| [`docs/JOURNAL.md`](docs/JOURNAL.md) | Journal jour-par-jour : fait / appris / décisions | ✅ |
+| [`docs/SKILLS.md`](docs/SKILLS.md) | Matrice compétences ↔ livrables (KPIT/Vitesco) | ✅ |
+| [`docs/INTERVIEW_QA.md`](docs/INTERVIEW_QA.md) | 30 questions d'entretien anticipées + réponses | ✅ |
+| [`CHANGELOG.md`](CHANGELOG.md) | Releases par semaine, format Keep-a-Changelog | ✅ |
 | `docs/FMEA.md` | Analyse modes de défaillance | ⏳ jour 15 |
 | `docs/RESULTS.md` | Benchmarks, courbes, distance d'arrêt | ⏳ jour 20-21 |
 
@@ -101,11 +105,33 @@ Attendu : `stopping distance ∈ [35, 55] m, ECU_ACTIVE atteint, 0 DTC, jitter �
 ## 🎓 Compétences mises en œuvre
 
 - **Embedded C** : architecture en couches (HAL/Drivers/Application), allocation statique, MISRA-aware
-- **Sûreté de fonctionnement** : FMEA, plausibility checks, watchdog, DTC, fail-safe
+- **Sûreté de fonctionnement** : FMEA, plausibility checks, watchdog, DTC, fail-operational
 - **IPC / Communication** : sockets TCP, protocole binaire encadré, CRC16, framing, gestion désynchronisation
-- **Temps réel** : `clock_nanosleep(TIMER_ABSTIME)`, mesure de jitter, période 10 ms stable
-- **Tests** : tests unitaires C, scénarios d'injection de pannes scriptés
+- **Temps réel** : `clock_nanosleep(TIMER_ABSTIME)`, mesure de jitter (σ < 1 ms), période 10 ms stable
+- **Tests** : 30 tests unitaires C + 13 Python + 2 milestones d'intégration, CI verte à chaque commit
 - **Modélisation physique** : équations Newton, modèle de pneu Pacejka, intégration Euler
+
+→ Mapping détaillé compétences ↔ fichiers : [`docs/SKILLS.md`](docs/SKILLS.md).
+
+## 🎯 Ce que ce projet prouve
+
+| Question recruteur | Preuve dans le repo |
+|---|---|
+| "Tu sais structurer du C embarqué ?" | Séparation `drivers/` / `hal/` / `app/`, 30 tests unitaires, build `-Werror -Wpedantic` propre |
+| "Tu connais AUTOSAR ?" | Pattern MCAL/HAL/SWC reproduit ; `hal_sensors.h` réutilisable sur STM32 sans toucher au métier |
+| "Tu sais concevoir un protocole binaire ?" | `docs/PROTOCOL.md` + impl bilingue C/Python + CRC validé byte-pour-byte |
+| "Tu maîtrises le temps réel ?" | Super-loop `clock_nanosleep(TIMER_ABSTIME)` 100 Hz, jitter σ = 211 µs mesuré |
+| "Tu penses sûreté ?" | State machine fault-aware, latch après N défauts, fail-operational, FMEA formel (S3) |
+| "Tu testes ce que tu écris ?" | 43 tests unitaires + 2 milestones end-to-end + CI GitHub Actions verte |
+
+## ⚠️ Limitations assumées (honnêteté technique)
+
+- **Pas certifié ISO 26262 / ASIL** — c'est un projet pédagogique, pas un livrable production. Patterns appliqués, pas process complet.
+- **Modèle quart-véhicule** uniquement — pas de répartition longitudinale/latérale, pas de transfert de charge, pas de 4-roues indépendantes.
+- **Pneu Pacejka simplifié à 3 paramètres** — pas de dépendance en charge / angle de carrossage / température. Suffisant pour valider l'algo ABS.
+- **Pas de freinage régénératif** (utile EV) — la HAL est prête à recevoir une seconde source de couple, ce n'est pas implémenté.
+- **Float au lieu de fixed-point** — choix de simplicité. En vrai safety-critical on durcirait en `q15` ou équivalent pour reproductibilité bit-à-bit.
+- **TCP loopback au lieu de CAN** — choix SIL. Le passage CAN-FD ne change que la HAL (par design).
 
 ## 📅 Planning
 
@@ -114,6 +140,16 @@ Projet sur 3 semaines en `full focus` (mai-juin 2026).
 - **Semaine 1** ✅ Fondations : physique, plant Python, protocole et sockets.
 - **Semaine 2** ✅ ECU : architecture modulaire C, machine à états, algo bang-bang, boucle temps réel.
 - **Semaine 3** ⏳ Sûreté : FMEA, module diagnostic, fault injector, scénarios de validation, polish.
+
+## 📦 Releases
+
+| Tag | Date | Périmètre | CI |
+|---|---|---|---|
+| `v0.1-week1` | 2026-05-26 | Plant Python, protocole binaire, sockets, milestone 1000 trames | ✅ [run #26496884457](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26496884457) |
+| `v0.2-week2` | 2026-05-27 | ECU C complet (HAL, FSM, bang-bang, super-loop), milestone SIL freinage | ✅ [run #26503946600](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26503946600) |
+| `v0.3-week3` | _à venir_ | FMEA, diagnostic, fault injector, 6 scénarios, polish |  |
+
+Détail complet : [`CHANGELOG.md`](CHANGELOG.md).
 
 ---
 
