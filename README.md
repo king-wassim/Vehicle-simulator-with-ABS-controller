@@ -1,8 +1,10 @@
 # ABS Digital Twin — SIL Co-Simulation Platform
 
+[![CI](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/workflows/ci.yml/badge.svg)](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/workflows/ci.yml)
+
 > Software-in-the-Loop platform simulating an automotive ABS ECU (C) coupled to a vehicle dynamics model (Python) via a custom binary protocol over TCP at 100 Hz.
 
-**Status:** 🚧 Work in progress — phase initiale (jour 1-2 / 21).
+**Status:** 🚧 Work in progress — **Semaine 1 terminée** (jour 7 / 21). Plant Python validé, protocole binaire spec+impl bilingue (C/Py), milestone réseau passé (1000 trames, 0 erreur, latence p99 < 0.5 ms en loopback WSL).
 
 ---
 
@@ -36,21 +38,39 @@ Détails : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 |---|---|---|
 | [`docs/PHYSICS.md`](docs/PHYSICS.md) | Équations véhicule, slip ratio, Pacejka | ✅ |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Choix de design, structure logicielle | ✅ |
-| `docs/PROTOCOL.md` | Spec trame binaire, framing, CRC | ⏳ jour 5-7 |
+| [`docs/PROTOCOL.md`](docs/PROTOCOL.md) | Spec trame binaire, framing, CRC | ✅ |
 | `docs/FMEA.md` | Analyse modes de défaillance | ⏳ jour 15 |
 | `docs/RESULTS.md` | Benchmarks, courbes, distance d'arrêt | ⏳ jour 20-21 |
 
-## 🚀 Lancement (à venir)
+## 🚀 Lancement (état actuel — fin de semaine 1)
 
+**Validation du plant offline** (sans socket) :
 ```bash
-# Terminal 1 — ECU (C)
-cd controller && make && ./build/abs_ecu
-
-# Terminal 2 — Plant (Python)
-cd plant && python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-python3 simulate.py --scenario nominal
+python3 -m plant.simulate                  # 2 scénarios + plot dans results/
+python3 -m plant.simulate --no-plot        # juste les chiffres
 ```
+Sortie attendue : `no_abs ≈ 60 m, oracle ≈ 47 m, gain ≈ 20 %, [OK] within envelope`.
+
+**Tests unitaires protocole** (CRC, framing, layout) :
+```bash
+python3 -m unittest tests.test_protocol -v        # 13/13 OK
+```
+
+**Build du contrôleur C** (cible Linux/WSL — POSIX sockets) :
+```bash
+cd controller && make all
+./build/test_crc                                  # KAT CRC-CCITT-FALSE
+```
+
+**Milestone semaine 1** (1000 trames, vérif round-trip & CRC) — deux terminaux :
+```bash
+# T1 — serveur Python
+python3 -m scripts.milestone_w1 --frames 1000 --rate 1000
+
+# T2 — client C (échange brake_command = v_vehicle en écho)
+./controller/build/ping_client 127.0.0.1 9000 1000
+```
+Attendu : `frames 1000/1000, 0 echo mismatches, mean latency < 1 ms, 0 CRC errors`.
 
 ## 🧪 Scénarios de test prévus
 
@@ -76,9 +96,9 @@ python3 simulate.py --scenario nominal
 
 Projet sur 3 semaines en `full focus` (mai-juin 2026).
 
-- **Semaine 1** — Fondations : physique, plant Python, protocole et sockets.
-- **Semaine 2** — ECU : architecture modulaire C, machine à états, algo bang-bang, boucle temps réel.
-- **Semaine 3** — Sûreté : FMEA, module diagnostic, fault injector, scénarios de validation, polish.
+- **Semaine 1** ✅ Fondations : physique, plant Python, protocole et sockets.
+- **Semaine 2** ⏳ ECU : architecture modulaire C, machine à états, algo bang-bang, boucle temps réel.
+- **Semaine 3** ⏳ Sûreté : FMEA, module diagnostic, fault injector, scénarios de validation, polish.
 
 ---
 
