@@ -83,6 +83,27 @@ jobs:
           ./controller/build/abs_ecu 127.0.0.1 9000 6 100
           wait $SERVER_PID
 
+      - name: Integration W3 — 6 acceptance scenarios (FMEA-driven)
+        # Stuck sensor, comm loss, CRC corruption, ice patch, noise, nominal.
+        # Each scenario asserts its own success criteria from docs/FMEA.md.
+        run: bash scripts/scenarios/run_all.sh
+
+      - name: Generate comparison plots for results artifact
+        env:
+          MPLBACKEND: Agg
+        run: python -m scripts.plot_results
+
+      - name: Upload result plots and scenario CSVs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: |
+            results/*.png
+            results/scenarios/*.csv
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload plant validation plot
         if: success()
         uses: actions/upload-artifact@v4

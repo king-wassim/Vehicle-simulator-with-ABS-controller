@@ -39,6 +39,7 @@
 
 #include "abs_controller.h"
 #include "abs_state.h"
+#include "diagnostic.h"
 #include "hal_actuators.h"
 #include "hal_sensors.h"
 #include "protocol.h"
@@ -88,23 +89,6 @@ static double jitter_stddev_us(const jitter_stats_t *j) {
     return sqrt(j->m2_us / (double)(j->n - 1));
 }
 
-/* ---- minimal in-loop diagnostic (full FMEA module lands in week 3) ---- */
-
-static uint16_t diagnostic_quick(const sensors_data_t *s,
-                                 uint32_t cycles_since_last_valid) {
-    uint16_t dtc = DTC_NONE;
-    /* F03: comm watchdog — too long without a fresh frame. */
-    if (cycles_since_last_valid * (uint32_t)(LOOP_PERIOD_NS / 1000000L)
-        > (uint32_t)WATCHDOG_TIMEOUT_MS) {
-        dtc |= DTC_COMM_TIMEOUT;
-    }
-    if (s == NULL || !s->valid) return dtc;
-    /* F05: gross range check — same envelope as in abs_state. */
-    if (s->omega_wheel < -0.1f || s->omega_wheel > 500.0f) dtc |= DTC_SENSOR_RANGE;
-    if (s->v_vehicle   < -1.0f || s->v_vehicle  > 120.0f)  dtc |= DTC_SENSOR_RANGE;
-    return dtc;
-}
-
 /* ---- main loop -------------------------------------------------------- */
 
 int main(int argc, char **argv) {
@@ -133,6 +117,7 @@ int main(int argc, char **argv) {
 
     abs_state_ctx_t      st;     abs_state_init(&st);
     abs_controller_ctx_t cc;     abs_controller_init(&cc);
+    diagnostic_ctx_t     dg;     diagnostic_init(&dg);
     jitter_stats_t       jit;    jitter_init(&jit);
 
     sensors_data_t  last_good = {0};
@@ -169,12 +154,16 @@ int main(int argc, char **argv) {
             cur.valid = false;
         }
 
-        /* --- 3. quick diagnostic (full FMEA in week 3) --- */
+        /* --- 3. diagnostic module — FMEA-driven (docs/FMEA.md) --- */
         const sensors_data_t *for_state =
             (cur.valid) ? &cur :
             (cycles_since_valid * (uint32_t)(LOOP_PERIOD_NS / 1000000L)
                  <= (uint32_t)WATCHDOG_TIMEOUT_MS) ? &last_good : &cur;
-        uint16_t dtc = diagnostic_quick(for_state, cycles_since_valid);
+        hal_sensors_stats_t link_stats;
+        hal_sensors_stats(&link_stats);
+        uint16_t dtc = diagnostic_check(&dg, for_state, WHEEL_RADIUS_M,
+                                         cycles_since_valid,
+                                         link_stats.errors_crc);
 
         /* --- 4. slip ratio (protected against v→0) --- */
         float slip = abs_controller_slip_protected(

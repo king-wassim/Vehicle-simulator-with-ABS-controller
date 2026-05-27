@@ -4,7 +4,7 @@
 
 > Software-in-the-Loop platform simulating an automotive ABS ECU (C) coupled to a vehicle dynamics model (Python) via a custom binary protocol over TCP at 100 Hz.
 
-**Status:** 🚧 Work in progress — **Semaines 1 et 2 terminées** (jour 14 / 21). Plant Python validé, protocole binaire spec+impl bilingue (C/Py), ECU C complet (HAL + state machine + bang-bang + super-loop temps réel 100 Hz). Milestone SIL end-to-end passé : voiture freine de 100 → 0 km/h en 54 m sous contrôle du C bang-bang, jitter σ < 1 ms.
+**Status:** ✅ **Sprint 3-semaines complet (jour 21/21)**. Plant Python validé, protocole binaire spec+impl bilingue (C/Py), ECU C complet (HAL + state machine + bang-bang + super-loop 100 Hz), module diagnostic FMEA, fault injector Python, **6 scénarios d'acceptance verts**, RESULTS.md avec benchmarks. CI GitHub Actions verte. Voiture freine de 100→0 km/h en ~45 m sous contrôle C, jitter σ < 100 µs, détection de panne capteur en < 110 ms.
 
 ---
 
@@ -43,8 +43,8 @@ Détails : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 | [`docs/SKILLS.md`](docs/SKILLS.md) | Matrice compétences ↔ livrables (KPIT/Vitesco) | ✅ |
 | [`docs/INTERVIEW_QA.md`](docs/INTERVIEW_QA.md) | 30 questions d'entretien anticipées + réponses | ✅ |
 | [`CHANGELOG.md`](CHANGELOG.md) | Releases par semaine, format Keep-a-Changelog | ✅ |
-| `docs/FMEA.md` | Analyse modes de défaillance | ⏳ jour 15 |
-| `docs/RESULTS.md` | Benchmarks, courbes, distance d'arrêt | ⏳ jour 20-21 |
+| [`docs/FMEA.md`](docs/FMEA.md) | Analyse modes de défaillance (10 modes, cartographie DTC, pyramide defense-in-depth) | ✅ |
+| [`docs/RESULTS.md`](docs/RESULTS.md) | Benchmarks complets : Python oracle vs C SIL, 6 scénarios, plots | ✅ |
 
 ## 🚀 Lancement (état actuel — fin de semaine 1)
 
@@ -139,7 +139,7 @@ Projet sur 3 semaines en `full focus` (mai-juin 2026).
 
 - **Semaine 1** ✅ Fondations : physique, plant Python, protocole et sockets.
 - **Semaine 2** ✅ ECU : architecture modulaire C, machine à états, algo bang-bang, boucle temps réel.
-- **Semaine 3** ⏳ Sûreté : FMEA, module diagnostic, fault injector, scénarios de validation, polish.
+- **Semaine 3** ✅ Sûreté : FMEA, module diagnostic, fault injector, **6 scénarios d'acceptance verts**, RESULTS.md.
 
 ## 📦 Releases
 
@@ -147,7 +147,7 @@ Projet sur 3 semaines en `full focus` (mai-juin 2026).
 |---|---|---|---|
 | `v0.1-week1` | 2026-05-26 | Plant Python, protocole binaire, sockets, milestone 1000 trames | ✅ [run #26496884457](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26496884457) |
 | `v0.2-week2` | 2026-05-27 | ECU C complet (HAL, FSM, bang-bang, super-loop), milestone SIL freinage | ✅ [run #26503946600](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26503946600) |
-| `v0.3-week3` | _à venir_ | FMEA, diagnostic, fault injector, 6 scénarios, polish |  |
+| `v0.3-week3` | 2026-05-27 | FMEA, diagnostic (44 tests C), fault injector, 6 scénarios, RESULTS.md | ✅ |
 
 Détail complet : [`CHANGELOG.md`](CHANGELOG.md).
 

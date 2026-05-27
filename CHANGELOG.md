@@ -9,18 +9,54 @@ The project follows a 3-week sprint plan — each week ships as a tagged release
 
 ## [Unreleased]
 
-### Added
-- `docs/JOURNAL.md` — day-by-day development journal (FR).
-- `docs/SKILLS.md` — skills ↔ deliverables matrix mapped to KPIT/Vitesco job ads.
-- `docs/INTERVIEW_QA.md` — 30 anticipated interview questions with prepared answers (FR).
+(nothing yet)
 
-### Planned (Week 3, days 15-21)
-- `docs/FMEA.md` — formal failure-mode analysis (≥8 modes).
-- `controller/src/app/diagnostic.{c,h}` — plausibility, stuck-sensor, noise detection.
-- `plant/fault_injector.py` — CLI for injecting faults at runtime.
-- `scripts/scenarios/` — 6 acceptance scenarios (nominal, ice patch, stuck sensor, comm loss, CRC, noise).
-- `docs/RESULTS.md` — benchmarks (oracle vs C SIL, fault reaction times, jitter).
-- README polish (architecture diagram, results plot, badges).
+---
+
+## [0.3.0] — 2026-05-27 — Week 3 — Safety, FMEA, fault injection
+
+### Added
+- **FMEA** (`docs/FMEA.md`): 10 documented failure modes (F01-F10), severity
+  scoring, DTC mapping, defense-in-depth pyramid, scenario verification matrix.
+- **Diagnostic module** (`controller/src/app/diagnostic.{c,h}`): per-FMEA-row
+  detectors (stuck, noise, range, plausibility, comm timeout, CRC rate),
+  orchestrator that ORs DTC bits, fully unit-tested (17 assertions, total
+  44 C unit tests).
+- **Fault injector** (`plant/fault_injector.py`): six fault classes with
+  timing windows: StuckSensorFault (F01), NoisySensorFault (F02),
+  RangeViolationFault (F05), CommLossFault (F03), CrcCorruptionFault (F04),
+  IcePatchFault (F10). Composable via a `FaultInjector`.
+- **Scenario harness** (`scripts/scenarios/harness.py`): plant ↔ ECU SIL
+  runner with rich per-tick logging and assertion helpers.
+- **6 acceptance scenarios** (`scripts/scenarios/s1..s6_*.py`): nominal,
+  ice patch, stuck sensor, comm loss 200 ms, CRC corruption 1 %, noisy
+  sensor. Driven by `scripts/scenarios/run_all.sh`.
+- **Plot generator** (`scripts/plot_results.py`): produces three PNGs —
+  Python oracle vs C SIL trace, stopping-distance bar chart, DTC timeline.
+- **RESULTS.md** (`docs/RESULTS.md`): 7-section benchmark report with
+  reproducible commands, all measured metrics, FMEA-aligned scenario results.
+- `main.c` now uses the proper diagnostic module instead of the inline
+  quick-check from W2.
+
+### Measured (Week 3 acceptance run)
+- All 6 scenarios PASS.
+- **Stuck-sensor detection latency**: 110 ms (FMEA target < 250 ms).
+- Comm-loss 200 ms → ECU LATCHED after 10 cycles (correct per FMEA F08).
+- CRC 1 % corruption: no DTC raised (below 5/100 rate threshold), distance
+  stays nominal (45.6 m vs 45.4 m baseline).
+- Vehicle stops fail-operational in every fault scenario (driver pedal
+  passes through).
+
+### Fixed
+- Stuck detector criterion changed from "v moved by > 0.10 m/s" to
+  "v_vehicle > 1 m/s" so it catches scenarios where the controller
+  releases the brake and the vehicle coasts at near-constant v.
+
+### Known limitations (honest)
+- Noise detector (F02) is built and unit-tested but disabled in the
+  orchestrator — bang-bang oscillations and Gaussian noise produce
+  overlapping statistical signatures. Documented in `docs/JOURNAL.md`
+  W3 J16-17 and `docs/RESULTS.md` §6.
 
 ---
 
