@@ -147,7 +147,7 @@ Projet sur 3 semaines en `full focus` (mai-juin 2026).
 |---|---|---|---|
 | `v0.1-week1` | 2026-05-26 | Plant Python, protocole binaire, sockets, milestone 1000 trames | ✅ [run #26496884457](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26496884457) |
 | `v0.2-week2` | 2026-05-27 | ECU C complet (HAL, FSM, bang-bang, super-loop), milestone SIL freinage | ✅ [run #26503946600](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26503946600) |
-| `v0.3-week3` | 2026-05-27 | FMEA, diagnostic (44 tests C), fault injector, 6 scénarios, RESULTS.md | ✅ |
+| `v0.3-week3` | 2026-05-27 | FMEA, diagnostic (44 tests C), fault injector, 6 scénarios, RESULTS.md | ✅ [run #26521054772](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26521054772) |
 
 Détail complet : [`CHANGELOG.md`](CHANGELOG.md).
 

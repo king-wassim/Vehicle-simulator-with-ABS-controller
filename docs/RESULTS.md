@@ -122,7 +122,10 @@ transitoires de SENSOR_RANGE quand le bruit pousse omega hors-plage.
 5. `scripts/milestone_w1.py` — milestone W1 ping (latence relâchée à 5 ms).
 6. `scripts/sil_brake_test.py` — milestone W2 SIL (voiture freine sous C).
 
-Historique : verte aux commits W1 (`0526e91`), W2 (`a519c1b`), W3 (à venir).
+Historique : verte aux commits W1 (`0526e91`), W2 (`a519c1b`), W3 (`0a0e171`).
+- W1 : [run #26496884457](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26496884457)
+- W2 : [run #26503946600](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26503946600)
+- W3 : [run #26521054772](https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26521054772) ✅
 
 ---
 

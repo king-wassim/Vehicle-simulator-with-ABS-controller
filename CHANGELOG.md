@@ -58,6 +58,10 @@ The project follows a 3-week sprint plan — each week ships as a tagged release
   overlapping statistical signatures. Documented in `docs/JOURNAL.md`
   W3 J16-17 and `docs/RESULTS.md` §6.
 
+### Validated
+- CI green on commit `0a0e171`:
+  https://github.com/king-wassim/Vehicle-simulator-with-ABS-controller/actions/runs/26521054772
+
 ---
 
 ## [0.2.0] — 2026-05-27 — Week 2 — C ECU & real-time loop
