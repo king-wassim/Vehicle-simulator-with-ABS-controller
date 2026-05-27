@@ -4,7 +4,7 @@
 
 > Software-in-the-Loop platform simulating an automotive ABS ECU (C) coupled to a vehicle dynamics model (Python) via a custom binary protocol over TCP at 100 Hz.
 
-**Status:** 🚧 Work in progress — **Semaine 1 terminée** (jour 7 / 21). Plant Python validé, protocole binaire spec+impl bilingue (C/Py), milestone réseau passé (1000 trames, 0 erreur, latence p99 < 0.5 ms en loopback WSL).
+**Status:** 🚧 Work in progress — **Semaines 1 et 2 terminées** (jour 14 / 21). Plant Python validé, protocole binaire spec+impl bilingue (C/Py), ECU C complet (HAL + state machine + bang-bang + super-loop temps réel 100 Hz). Milestone SIL end-to-end passé : voiture freine de 100 → 0 km/h en 54 m sous contrôle du C bang-bang, jitter σ < 1 ms.
 
 ---
 
@@ -72,6 +72,21 @@ python3 -m scripts.milestone_w1 --frames 1000 --rate 1000
 ```
 Attendu : `frames 1000/1000, 0 echo mismatches, mean latency < 1 ms, 0 CRC errors`.
 
+**Tests unitaires C** (30 assertions : CRC + state machine + bang-bang) :
+```bash
+make -C controller test
+```
+
+**Milestone semaine 2 — SIL end-to-end** (vraie co-simulation : voiture freine sous contrôle C) :
+```bash
+# T1 — plant Python (sim physique + serveur protocole)
+python3 -m scripts.sil_brake_test --surface dry_asphalt --duration 6
+
+# T2 — ECU C (state machine + bang-bang + super-loop 100 Hz)
+./controller/build/abs_ecu 127.0.0.1 9000 6 100
+```
+Attendu : `stopping distance ∈ [35, 55] m, ECU_ACTIVE atteint, 0 DTC, jitter σ < 1 ms`.
+
 ## 🧪 Scénarios de test prévus
 
 | Scénario | Attendu |
@@ -97,7 +112,7 @@ Attendu : `frames 1000/1000, 0 echo mismatches, mean latency < 1 ms, 0 CRC error
 Projet sur 3 semaines en `full focus` (mai-juin 2026).
 
 - **Semaine 1** ✅ Fondations : physique, plant Python, protocole et sockets.
-- **Semaine 2** ⏳ ECU : architecture modulaire C, machine à états, algo bang-bang, boucle temps réel.
+- **Semaine 2** ✅ ECU : architecture modulaire C, machine à états, algo bang-bang, boucle temps réel.
 - **Semaine 3** ⏳ Sûreté : FMEA, module diagnostic, fault injector, scénarios de validation, polish.
 
 ---
